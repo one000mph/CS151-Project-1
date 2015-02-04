@@ -114,11 +114,11 @@ def breadthFirstSearch(problem):
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    fringe = util.Queue()
+    fringe = util.PriorityQueue()
     startState = problem.getStartState()
-    startStateTuple = (startState, 'Goal', 0), [(startState, 'Goal', 0)]
-    fringe.push(startStateTuple)
-    graphPath = graphSearch(problem, fringe)
+    startStateTuple = (startState, 'Goal', 0), [(startState, 'Goal', 0)], 0
+    fringe.push(startStateTuple, 0)
+    graphPath = UCSGraphSearch(problem, fringe)
     path = []
     while not graphPath == []:
         step = graphPath.pop()[1]
@@ -135,8 +135,21 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    fringe = util.PriorityQueue()
+    startState = problem.getStartState()
+    print startState
+    startStateTuple = (startState, 'Goal', 0), [(startState, 'Goal', 0)], 0
+    fringe.push(startStateTuple, 0)
+    graphPath = AStarGraphSearch(problem, fringe, heuristic)
+    path = []
+    while not graphPath == []:
+        step = graphPath.pop()[1]
+        if step != 'Goal':
+            path.insert(0, step)
+    return path
+
+def aStarHelper(problem, heuristic):
+    heuristicCost = heuristic()
 
 
 def graphSearch(problem, fringe):
@@ -160,6 +173,51 @@ def graphSearch(problem, fringe):
                 successors = problem.getSuccessors(node[0])
                 for child in successors:
                     fringe.push((child, path + [child]))
+
+def UCSGraphSearch(problem, fringe):
+    closed = []
+    while not fringe.isEmpty():
+        state = fringe.pop()
+        # print "state is", state
+        node = state[0]
+        path = state[1]
+        cost = state[2]
+        # print "cost is", cost
+        if node[0] not in closed:
+            closed.append(node[0])
+            if problem.isGoalState(node[0]):
+                return path
+            else:
+                successors = problem.getSuccessors(node[0])
+                for child in successors:
+                    # print "child is", child
+                    childCost = child[2]
+                    backwardsCost = cost + childCost
+                    # print backwardsCost
+                    fringe.push((child, path + [child], backwardsCost), backwardsCost)
+
+def AStarGraphSearch(problem, fringe, heuristic):
+    closed = []
+    while not fringe.isEmpty():
+        state = fringe.pop()
+        # print "state is", state
+        node = state[0]
+        path = state[1]
+        cost = state[2]
+        # print "cost is", cost
+        if node[0] not in closed:
+            closed.append(node[0])
+            if problem.isGoalState(node[0]):
+                return path
+            else:
+                successors = problem.getSuccessors(node[0])
+                for child in successors:
+                    # print "child is", child
+                    forwardsCost = heuristic(node, problem)
+                    backwardsCost = cost + child[2]
+                    totalCost = forwardsCost + backwardsCost
+                    # print backwardsCost
+                    fringe.push((child, path + [child], backwardsCost), totalCost)
 
 # Abbreviations
 bfs = breadthFirstSearch
