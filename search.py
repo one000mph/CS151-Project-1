@@ -126,6 +126,8 @@ def uniformCostSearch(problem):
             path.insert(0, step)
     return path
 
+
+
 def nullHeuristic(state, problem=None):
     """
     A heuristic function estimates the cost from the current state to the nearest
@@ -148,8 +150,30 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             path.insert(0, step)
     return path
 
-def aStarHelper(problem, heuristic):
-    heuristicCost = heuristic()
+def AStarGraphSearch(problem, fringe, heuristic):
+    closed = []
+    while not fringe.isEmpty():
+        state = fringe.pop()
+        # print "state is", state
+        node = state[0]
+        path = state[1]
+        cost = state[2]
+        # print "cost is", cost
+        if node[0] not in closed:
+            closed.append(node[0])
+            if problem.isGoalState(node[0]):
+                return path
+            else:
+                successors = problem.getSuccessors(node[0])
+                for child in successors:
+                    # print "child is", child
+                    forwardsCost = heuristic(child[0], problem)
+                    # print "forwardsCost is", forwardsCost
+                    backwardsCost = cost + child[2]
+                    # print "backwardsCost is", backwardsCost
+                    totalCost = forwardsCost + backwardsCost
+                    # print backwardsCost
+                    fringe.push((child, path + [child], backwardsCost), totalCost)
 
 
 def graphSearch(problem, fringe):
@@ -196,28 +220,6 @@ def UCSGraphSearch(problem, fringe):
                     # print backwardsCost
                     fringe.push((child, path + [child], backwardsCost), backwardsCost)
 
-def AStarGraphSearch(problem, fringe, heuristic):
-    closed = []
-    while not fringe.isEmpty():
-        state = fringe.pop()
-        # print "state is", state
-        node = state[0]
-        path = state[1]
-        cost = state[2]
-        # print "cost is", cost
-        if node[0] not in closed:
-            closed.append(node[0])
-            if problem.isGoalState(node[0]):
-                return path
-            else:
-                successors = problem.getSuccessors(node[0])
-                for child in successors:
-                    # print "child is", child
-                    forwardsCost = heuristic(node, problem)
-                    backwardsCost = cost + child[2]
-                    totalCost = forwardsCost + backwardsCost
-                    # print backwardsCost
-                    fringe.push((child, path + [child], backwardsCost), totalCost)
 
 # Abbreviations
 bfs = breadthFirstSearch
